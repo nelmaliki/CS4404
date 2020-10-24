@@ -27,21 +27,34 @@ app.get("/", (request, response) => {
     response.json(dreams);
 });*/
 
+//TODO: Connect to database
+
+function resetDatabase() {
+    //TODO: Fill in method once we know how to connect to the database. Simply run SQL commands to clear the database.
+}
+
 app.get("/voteFcn", (req, res) => {
     //TODO: Ensure voter only votes once. (IP checks?)
    //Get voter name
     let name = req.body.name
-    if(/^[A-Za-z0-9 _-]+$/.test(name)) {
-        alert("Invalid input. Name can only contain A-Z, a-z, or 0-9.")
+    if(/^[A-Za-z0-9 -]+$/.test(name)) {
+        alert("Invalid input. Name can only contain A-Z, a-z, 0-9, and spaces/hyphens.")
         return;
     }
     //get vote
     let vote = req.body.voteData
     if(vote === 'writein') vote = req.body.writein;
-    if(/^[A-Za-z0-9 _-]+$/.test(vote)) {
-        alert("Invalid input. Write in cannot contain symbols except for - and _.")
+    if(/^[A-Za-z0-9 -]+$/.test(vote)) {
+        alert("Invalid input. Write in cannot contain symbols except for spaces/hyphens")
         return;
     }
+    //Quick and dirty way to reset the database on the fly. NOTE: REMOVE BEFORE DEPLOYMENT
+    if(vote==='resetDB') {
+        resetDatabase();
+        console.log(`Reset database!`)
+        alert("Reset database, please reload the page.")
+    }
+    //TODO: Function to reset database if write-in = resetDB
     //TODO: Query database to insert new record
     console.log(`Received vote from "${name}" for "${vote}".`)
     res.send(`${name}, your vote for ${vote} has been recorded.`)
