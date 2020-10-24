@@ -6,6 +6,11 @@
 // but feel free to use whatever libraries or frameworks you'd like through `package.json`.
 const express = require("express");
 const app = express();
+const tempVotes = [
+    "Nike: 3",
+    "Skechers: 10",
+    "Timbs: 4"
+]
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
@@ -22,19 +27,19 @@ app.get("/", (request, response) => {
     response.json(dreams);
 });*/
 
-app.get("/vote", (req, res) => {
+app.get("/voteFcn", (req, res) => {
     //TODO: Ensure voter only votes once. (IP checks?)
    //Get voter name
     let name = req.body.name
-    if(/^[A-Za-z0-9]+$/.test(name)) {
+    if(/^[A-Za-z0-9 _-]+$/.test(name)) {
         alert("Invalid input. Name can only contain A-Z, a-z, or 0-9.")
         return;
     }
     //get vote
     let vote = req.body.voteData
     if(vote === 'writein') vote = req.body.writein;
-    if(/^[A-Za-z0-9]+$/.test(vote)) {
-        alert("Invalid input. Write in cannot contain symbols.")
+    if(/^[A-Za-z0-9 _-]+$/.test(vote)) {
+        alert("Invalid input. Write in cannot contain symbols except for - and _.")
         return;
     }
     //TODO: Query database to insert new record

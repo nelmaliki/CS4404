@@ -1,0 +1,49 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link id="favicon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEACABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAEhISACslsQAcFqYAJx6dAGlqagDe6uwAFBQUANzn6wDk8PQAMTIwANfj5QDf7O4AHBocAJeXlwDc6e0A////ABYWFgDw9/oAGR0cACgesADi7vAADw8PACojswAGCwkAGBgYAOj0+ADm8vUAPTixACMbrgAlHaoAEQ5bAOLt8QD8//0A3+vuAGtm4wBrbGoA/v/9AEBBPwAeFawAWVlZAC4uLgAAAQAA/v7+ANHS8AAxMzEA5vH1AAsNFwC4xMcA2OTmADIougDS4eQA2OPnAERERABGREQAsL7EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQJSUrJSElECEQEBAQEBArLiAGIhU3Gw8zMBocEBAQEBQdAgggEiYkIwU2GRAQEBAyHhMHKQYMKiwQEBAQEBAQGDE0CQstNRAQEBAQEBAQECcvHwERDhAQEBAQEBAQEBAKBAMXFhAQEBAQEBAQEBAQEBAoDSsQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAP//AAA=" rel="icon" type="image/x-icon" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Voting system for Shueworld">
+
+    <title>Voting System</title>
+
+    <!-- import the webpage's client-side javascript file -->
+    <script src="/public/script.js" defer></script>
+</head>
+<body>
+<header>
+    <h1>Cast your vote</h1>
+</header>
+
+<main>
+    <h2>Enter your name and candidate selection, then press submit</h2>
+
+    <p>Enter name (first and last with a space in between):</p>
+
+    <form action="/voteFcn">
+        <div><label> Your Name: <input type="text" maxlength="50" name="name" required placeholder="First and last separated by space"></label></div>
+        <div><label> <input type="radio" name="vote" value="Nike"> Nike </label></div>
+        <div><label> <input type="radio" name="vote" value="Skechers"> Skechers </label></div>
+        <div>
+            <label> <input type="radio" name="vote" value="writein"> Write-In </label>
+            <input type="text" maxlength="50" name="writein" placeholder="Write-In Space">
+        </div>
+        <button type="submit" id="submit-vote"> Cast Vote </button>
+    </form>
+
+    <section class="votes">
+        <ul id="votes">
+            <em>loading votes&hellip;</em>
+        </ul>
+    </section>
+</main>
+
+<!-- include the Glitch button to show what the webpage is about and
+      to make it easier for folks to view source and remix -->
+</body>
+</html>
