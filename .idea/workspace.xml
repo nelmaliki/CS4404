@@ -26,10 +26,13 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44f09017-54cf-4a63-81e4-f5a087895d71" name="Default Changelist" comment="Added barebones HTML for testing and updated .js files with proper names.">
+    <list default="true" id="44f09017-54cf-4a63-81e4-f5a087895d71" name="Default Changelist" comment="JS works now more or less, also added some stuff in the README.">
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/views/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/views/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +57,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -93,6 +97,7 @@
       <option name="presentableId" value="Default" />
       <updated>1603560147168</updated>
       <workItem from="1603560148475" duration="5839000" />
+      <workItem from="1603571061150" duration="4743000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <created>1603561399922</created>
@@ -136,11 +141,14 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First Commit" />
     <MESSAGE value="Added barebones HTML for testing and updated .js files with proper names." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added barebones HTML for testing and updated .js files with proper names." />
+    <MESSAGE value="JS works now more or less, also added some  stuff in the README." />
+    <MESSAGE value="JS works now more or less, also added some stuff in the README." />
+    <option name="LAST_COMMIT_MESSAGE" value="JS works now more or less, also added some stuff in the README." />
   </component>
   <component name="WindowStateProjectService">
     <state x="298" y="162" width="1084" height="710" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1603560512137">
@@ -155,22 +163,30 @@
       <screen x="0" y="27" width="1680" height="955" />
     </state>
     <state x="623" y="262" width="424" height="491" key="FileChooserDialogImpl/0.27.1680.955@0.27.1680.955" timestamp="1603560167455" />
-    <state width="1657" height="243" key="GridCell.Tab.0.bottom" timestamp="1603565373052">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1897" height="303" key="GridCell.Tab.0.bottom" timestamp="1603575797172">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
+    <state width="1897" height="303" key="GridCell.Tab.0.bottom/0.25.1920.1175@0.25.1920.1175" timestamp="1603575797172" />
     <state width="1657" height="243" key="GridCell.Tab.0.bottom/0.27.1680.955@0.27.1680.955" timestamp="1603565373052" />
-    <state width="1657" height="243" key="GridCell.Tab.0.center" timestamp="1603565373051">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1897" height="303" key="GridCell.Tab.0.center" timestamp="1603575797172">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
+    <state width="1897" height="303" key="GridCell.Tab.0.center/0.25.1920.1175@0.25.1920.1175" timestamp="1603575797172" />
     <state width="1657" height="243" key="GridCell.Tab.0.center/0.27.1680.955@0.27.1680.955" timestamp="1603565373051" />
-    <state width="1657" height="243" key="GridCell.Tab.0.left" timestamp="1603565373050">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1897" height="303" key="GridCell.Tab.0.left" timestamp="1603575797171">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
+    <state width="1897" height="303" key="GridCell.Tab.0.left/0.25.1920.1175@0.25.1920.1175" timestamp="1603575797171" />
     <state width="1657" height="243" key="GridCell.Tab.0.left/0.27.1680.955@0.27.1680.955" timestamp="1603565373050" />
-    <state width="1657" height="243" key="GridCell.Tab.0.right" timestamp="1603565373052">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1897" height="303" key="GridCell.Tab.0.right" timestamp="1603575797172">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
+    <state width="1897" height="303" key="GridCell.Tab.0.right/0.25.1920.1175@0.25.1920.1175" timestamp="1603575797172" />
     <state width="1657" height="243" key="GridCell.Tab.0.right/0.27.1680.955@0.27.1680.955" timestamp="1603565373052" />
+    <state x="799" y="326" width="313" height="568" key="RollbackChangesDialog" timestamp="1603575729488">
+      <screen x="0" y="25" width="1920" height="1175" />
+    </state>
+    <state x="799" y="326" width="313" height="568" key="RollbackChangesDialog/0.25.1920.1175@0.25.1920.1175" timestamp="1603575729488" />
     <state x="435" y="226" width="800" height="563" key="Vcs.Push.Dialog.v2" timestamp="1603565427638">
       <screen x="0" y="27" width="1680" height="955" />
     </state>

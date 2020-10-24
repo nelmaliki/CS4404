@@ -6,12 +6,8 @@
 // but feel free to use whatever libraries or frameworks you'd like through `package.json`.
 const express = require("express");
 const app = express();
-const tempVotes = [
-    "Nike: 3",
-    "Skechers: 10",
-    "Timbs: 4"
-]
 
+const alert = require('alert')
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
@@ -36,16 +32,20 @@ function resetDatabase() {
 app.get("/voteFcn", (req, res) => {
     //TODO: Ensure voter only votes once. (IP checks?)
    //Get voter name
-    let name = req.body.name
-    if(/^[A-Za-z0-9 -]+$/.test(name)) {
+    console.log(req.query)
+    let name = req.query.name
+    let nameRegex = /^([A-Z][a-z][0-9][ -]){2,20}/
+    if(nameRegex.test(name)) {
         alert("Invalid input. Name can only contain A-Z, a-z, 0-9, and spaces/hyphens.")
         return;
     }
     //get vote
-    let vote = req.body.voteData
-    if(vote === 'writein') vote = req.body.writein;
-    if(/^[A-Za-z0-9 -]+$/.test(vote)) {
-        alert("Invalid input. Write in cannot contain symbols except for spaces/hyphens")
+    let vote = req.query.vote
+    if(vote === 'writein'){
+        vote = req.query.writein;
+    }
+    if(nameRegex.test(vote) || vote==='') {
+        alert("Invalid input. Write can only contain A-Z, a-z, 0-9, and spaces/hyphens.")
         return;
     }
     //Quick and dirty way to reset the database on the fly. NOTE: REMOVE BEFORE DEPLOYMENT
