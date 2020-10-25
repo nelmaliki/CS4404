@@ -6,7 +6,7 @@
 // but feel free to use whatever libraries or frameworks you'd like through `package.json`.
 const express = require("express");
 const app = express();
-
+const mysql = require('mysql')
 const alert = require('alert')
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
@@ -24,7 +24,12 @@ app.get("/", (request, response) => {
 });*/
 
 //TODO: Connect to database
-
+const connection = mysql.createConnection({
+    host: 'us-cdbr-east-02.cleardb.com',
+    user: 'b0ec116f629fb6',
+    password: '1b2f0771f9e2812',
+    database: 'heroku_e362e57bba7349a'
+})
 function resetDatabase() {
     //TODO: Fill in method once we know how to connect to the database. Simply run SQL commands to clear the database.
 }
@@ -33,6 +38,12 @@ app.get("/voteFcn", (req, res) => {
     //TODO: Ensure voter only votes once. (IP checks?)
    //Get voter name
     console.log(req.query)
+    //test db connection
+    connection.connect()
+    connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+        if (error) throw error;
+        console.log('The solution is: ', results[0].solution);
+    });
     let name = req.query.name
     let nameRegex = /^([A-Z][a-z][0-9][ -]){2,20}/
     if(nameRegex.test(name)) {
