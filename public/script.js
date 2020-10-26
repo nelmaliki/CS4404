@@ -28,6 +28,9 @@ votesForm.addEventListener("submit", event => {
     event.preventDefault()
 
     //get new values
+
+    let ssn = votesForm.elements.ssn.value
+    console.log(ssn)
     let voterName = votesForm.elements.name.value
     let vote = votesForm.elements.vote.value
     if (vote === 'writein') vote = votesForm.elements.writein.value
@@ -41,12 +44,12 @@ votesForm.addEventListener("submit", event => {
         window.alert("Invalid input. Write can only contain A-Z, a-z, 0-9, and spaces/hyphens.")
         return;
     }
-    let stringThing = JSON.stringify({name: voterName, candidate: vote})
+    let stringThing = JSON.stringify({ssn: ssn, name: voterName, candidate: vote})
     console.log(stringThing)
     //Input can now be sent to server
     return fetch("/voteFcn", {
         method: "POST",
-        body: JSON.stringify({name: voterName, candidate: vote}),
+        body: JSON.stringify({ssn: ssn, name: voterName, candidate: vote}),
         headers: {"Content-Type": "application/json"}
     })
         .then(res => res.json())

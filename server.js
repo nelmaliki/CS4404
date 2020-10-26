@@ -19,7 +19,7 @@ const connection = mysql.createConnection({
 connection.connect(function(err) {
     if(err)
         return console.error('error '+err.message)
-    let createVotes = `CREATE TABLE IF NOT EXISTS Votes(voterName VARCHAR(255) NOT NULL, candidateName VARCHAR(255) NOT NULL, PRIMARY KEY(voterName))`
+    let createVotes = `CREATE TABLE IF NOT EXISTS Votes(SSN varchar(255),voterName VARCHAR(255) NOT NULL, candidateName VARCHAR(255) NOT NULL, PRIMARY KEY(SSN))`
     connection.query(createVotes,function (err, results, fields) {
         if(err) {
             console.log(err.message)
@@ -53,6 +53,22 @@ app.get("/", (request, response) => {
 
 function resetDatabase() {
     //TODO: Fill in method once we know how to connect to the database. Simply run SQL commands to clear the database.
+
+    connection.connect(function(err) {
+        if(err)
+            return console.error('error '+err.message)
+        let deleteRecords = `DELETE FROM Votes;`
+        connection.query(deleteRecords,function (err, results, fields) {
+            if(err) {
+                console.log(err.message)
+            }
+        })
+        connection.end(function(err) {
+            if(err) {
+                return console.log(err.message)
+            }
+        })
+    })
 }
 
 app.post("/voteFcn", bodyParser.json(), (req, res) => {
@@ -64,10 +80,14 @@ app.post("/voteFcn", bodyParser.json(), (req, res) => {
         if (error) throw error;
         console.log('The solution is: ', results[0].solution);
     });
+    let ssn = req.body.ssn
     let name = req.body.name
     let vote = req.body.candidate
+    console.log('SSN = '+ssn)
     console.log('NAME = '+name)
     console.log('VOTE = '+vote)
+
+    addToDataBase(ssn,name,vote)
     //Quick and dirty way to reset the database on the fly. NOTE: REMOVE BEFORE DEPLOYMENT
     if(vote==='resetDB') {
         resetDatabase();
@@ -77,6 +97,18 @@ app.post("/voteFcn", bodyParser.json(), (req, res) => {
     console.log(`Received vote from "${name}" for "${vote}".`)
     res.json({res:true,message:`${name}, your vote for ${vote} has been recorded.`})
 });
+
+function addToDataBase(ssn,name,vote){
+    con.connect(function(err) {
+        if (err) throw err;
+        console.log("Connected!");
+        var sql = `INSERT INTO Votes  VALUES (${ssn}, ${name},${vote})`;
+        con.query(sql, function (err, result) {
+            if (err) throw err;
+            console.log("1 record inserted");
+        });
+    });
+}
 
 
 let votes = [3,10,4]
