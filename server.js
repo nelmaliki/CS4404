@@ -8,6 +8,8 @@ const express = require("express")
 const app = express()
 const mysql = require('mysql')
 const bodyParser = require('body-parser')
+const https = require('https')
+const fs = require('fs')
 
 const connection = mysql.createConnection({
     host: 'us-cdbr-east-02.cleardb.com',
@@ -132,6 +134,18 @@ app.get('/votes', (req, res) => {
 })
 
 // listen for requests :)
-const listener = app.listen(process.env.PORT, () => {
+/*const listener = app.listen(process.env.PORT, () => {
     console.log("Your app is listening on port " + listener.address().port);
-});
+});*/
+
+const options = {
+    key: fs.readFileSync("./certificates/key.pem"),
+    cert: fs.readFileSync("./certificates/cert.pem")
+}
+
+//Listen on http
+app.listen(8000)
+//Listen on https. The domain is https://localhost:8080
+https.createServer(options,app).listen(8080)
+console.log("Your app is listening on port 8000 for HTTP connections. http://localhost:8000")
+console.log("Your app is listening on port 8080 for HTTPS connections. https://localhost:8080")
