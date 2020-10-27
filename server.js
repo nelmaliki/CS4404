@@ -13,22 +13,57 @@ const fs = require('fs')
 const cookieparser = require('cookie-parser')
 app.use(cookieparser())
 
-const connection = mysql.createPool({
-    connectionLimit: 3, //this should fix the weird error event bug
+const pool = mysql.createPool({
+    connectionLimit: 100, //this should fix the weird error event bug
     host: 'us-cdbr-east-02.cleardb.com',
     user: 'b0ec116f629fb6',
     password: '1b2f0771f9e2812',
-    database: 'heroku_e362e57bba7349a'
+    database: 'heroku_e362e57bba7349a',
+    supportBigNumbers: true
 });
 
-connection.on('connection', function(connection) {
-    let createVotes = `CREATE TABLE IF NOT EXISTS Votes(SSN INTEGER(255),voterName VARCHAR(255) NOT NULL, candidateName VARCHAR(255) NOT NULL, PRIMARY KEY(SSN))`
-    connection.query(createVotes, function (err, results, fields) {
+
+pool.getConnection(function (err, connection) {
+    if (err) {
+        connection.release();
+        throw err;
+    }
+    let createVoterData = 'CREATE TABLE IF NOT EXISTS VoterData(ssn INT NOT NULL, voterName VARCHAR(255) NOT NULL, PRIMARY KEY(ssn, voterName));'
+    connection.query(createVoterData, function (err, results, fields) {
         if (err) {
-            console.log(err.message)
+            console.log(`ERROR IN CREATEVOTERDATA TABLE`)
+            return console.log(err.message)
         }
     })
+    let createVotes = `CREATE TABLE IF NOT EXISTS Votes(ssn INT, voterName VARCHAR(255), candidateName VARCHAR(255), FOREIGN KEY (ssn,voterName) REFERENCES voterData(ssn,voterName) ON DELETE SET NULL ON UPDATE CASCADE);`
+    connection.query(createVotes, function (err, results, fields) {
+        if (err) {
+            console.log(`ERROR IN CREATEVOTES TABLE`)
+            return console.log(err.message)
+        }
+    })
+    let sql = "INSERT INTO VoterData(SSN, voterName) VALUES ?";
+    let values = [
+        [111111111, 'name1'],
+        [222222222, 'name2'],
+        [333333333, 'name3'],
+        [444444444, 'name4'],
+        [555555555, 'name5'],
+        [666666666, 'name6'],
+        [777777777, 'name7'],
+        [888888888, 'name8'],
+        [999999999, 'name9'],
+        [696969696, 'name69']
+    ];
+    connection.query(sql, [values], function (err) {
+        if (err) {
+            console.log(`ERROR INSERTING VALUES INTO VOTERDATA`)
+            return console.log(err.message)
+        }
+    });
+    connection.release();
 });
+
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
@@ -45,29 +80,41 @@ app.get("/ballot", (request, response) => {
     response.sendFile(__dirname + "/views/ballot.html");
 });
 
-// send the default array of dreams to the webpage
-/*app.get("/dreams", (request, response) => {
-    // express helps us take JS objects and send them as JSON
-    response.json(dreams);
-});*/
-
 //Call by putting resetDB in the write-in field
 function resetDatabase() {
-    let deleteRecords = `DELETE FROM Votes;`
-    connection.query(deleteRecords, function (err, results, fields) {
+    pool.getConnection(function (err, connection) {
         if (err) {
-            return console.log(err.message)
+            connection.release();
+            throw err;
         }
+        let deleteRecords = `DELETE FROM Votes;`
+        connection.query(deleteRecords, function (err, results, fields) {
+            if (err) {
+                return console.log(err.message)
+            }
+        })
+        connection.release();
     })
 }
 
 //Call by putting deleteDB in the write-in field
 function deleteDatabase() {
-    let deleteDB = `DROP TABLE Votes`
-    connection.query(deleteDB, function (err, results, fields) {
+    pool.getConnection(function (err, connection) {
         if (err) {
-            return console.log(err.message)
+            connection.release();
+            throw err;
         }
+        let deleteDB = `DROP TABLE Votes`
+        connection.query(deleteDB, function (err, results, fields) {
+            if (err)
+                return console.log(err.message)
+        })
+        let deleteData = `DROP TABLE VoterData`
+        connection.query(deleteData, function (err, results, fields) {
+            if (err)
+                return console.log(err.message)
+        })
+        connection.release();
     })
 }
 
@@ -93,50 +140,101 @@ app.post("/voteFcn", bodyParser.json(), (req, res) => {
         return console.log('Deleted database, please restart server.')
     }
     let value = 0
-    addToDatabase({ssn,name,vote},function(result) {
+    checkVoted({ssn, name, vote}, function (result) {
         value = result
-        console.log(`VALUE = ${value}`)
-        if (value) {
-            console.log("addToDatabase returned true.")
-
-            res.json({res: true, message: `${name}, your vote for ${vote} has been recorded.`})
-        } else {
-            console.log("addToDatabase returned false.")
+        console.log(`VALUE checkVoted = ${value}`)
+        if (value === 1) {
             res.json({res: false, message: `${name}, you have already voted.`})
+        } else {
+            addToDatabase({ssn, name, vote}, function (result) {
+                value = result
+                console.log(`VALUE addToDatabase = ${value}`)
+                if (result === 0) {
+                    res.json({res: false, message: `Error inserting new record into database.`})
+                } else if (result === 1) {
+                    res.json({res: true, message: `${name}, your vote for ${vote} has been recorded.`})
+                }
+            })
         }
     })
-});
+
+})
+
+function checkVoted(data, callback) {
+    pool.getConnection(function (err, connection) {
+        if (err) {
+            connection.release();
+            throw err;
+        }
+        //--------------------------------------
+        let check = 'SELECT ssn, voterName FROM votes;'
+        connection.query(check, function (err, results) {
+            let ssnArray = []
+            if (err) {
+                console.log(`Error in addDatabase select ssn query`)
+                return console.log(err.message)
+            }
+            Object.keys(results).forEach(function (key) {
+                let row = results[key]
+                ssnArray.push(row.ssn.toString())
+            })
+            console.log(ssnArray)
+            console.log(`SSN FROM DATA = ${data.ssn}`)
+            console.log(ssnArray.includes(data.ssn))
+            if (ssnArray.includes(data.ssn)) {
+                connection.release()
+                console.log(`${data.name} has already voted`)
+                return callback(1)
+            }
+            connection.release();
+            return callback(0)
+        })
+    })
+}
 
 function addToDatabase(data, callback) {
-    let sql = `INSERT INTO Votes VALUES (${data.ssn}, '${data.name}','${data.vote}')`;
-    connection.query(sql, function (err, results, fields) {
+    pool.getConnection(function (err, connection) {
         if (err) {
-            console.log(err.message)
-            return callback(0)
-
+            connection.release()
+            throw err;
         }
-        console.log("1 record inserted.")
-        return callback(1)
+        let sql = `INSERT INTO Votes VALUES (${data.ssn}, '${data.name}','${data.vote}')`
+        connection.query(sql, function (err, results, fields) {
+            if (err) {
+                connection.release()
+                console.log(err.message)
+                return callback(0)
+            }
+            connection.release();
+            console.log("1 record inserted.")
+            return callback(1)
+        })
     })
 }
 
 
-
 app.get('/votes', (req, res) => {
-    let candidates = []
-    let votes = []
-    let sql = `SELECT candidateName, COUNT(*) AS numVotes FROM VOTES GROUP BY candidateName`
-    connection.query(sql, function (err, results) {
+    pool.getConnection(function (err, connection) {
         if (err) {
-            console.log(`Error in app.get query`)
-            return console.log(err.message)
+            connection.release();
+            throw err;
         }
-        Object.keys(results).forEach(function (key) {
-            var row = results[key]
-            candidates.push(row.candidateName)
-            votes.push(row.numVotes)
+        let candidates = []
+        let votes = []
+        let sql = 'SELECT candidateName, COUNT(*) AS numVotes FROM VOTES GROUP BY candidateName;'
+        connection.query(sql, function (err, results) {
+            if (err) {
+                console.log(`Error in app.get query`)
+                return console.log(err.message)
+            }
+            connection.release();
+            Object.keys(results).forEach(function (key) {
+                let row = results[key]
+                candidates.push(row.candidateName)
+                votes.push(row.numVotes)
+            })
+            res.json({nameCandidate: candidates, numVotes: votes})
         })
-        res.json({nameCandidate: candidates, numVotes: votes})
     })
 })
 
@@ -153,6 +251,6 @@ const options = {
 //Listen on http
 app.listen(8000)
 //Listen on https. The domain is https://localhost:8080
-https.createServer(options,app).listen(8080)
+https.createServer(options, app).listen(8090)
 console.log("Your app is listening on port 8000 for HTTP connections. http://localhost:8000")
-console.log("Your app is listening on port 8080 for HTTPS connections. https://localhost:8080")
+console.log("Your app is listening on port 8090 for HTTPS connections. https://localhost:8090")

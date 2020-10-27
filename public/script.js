@@ -58,7 +58,7 @@ votesForm.addEventListener("submit", event => {
             }
             else if(json.res===false){
                 alert(json.message)
-                location.reload()
+                //location.reload()
             }
             //reset form
             votesForm.reset()
