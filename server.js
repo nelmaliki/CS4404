@@ -10,25 +10,25 @@ const mysql = require('mysql')
 const bodyParser = require('body-parser')
 const https = require('https')
 const fs = require('fs')
+const cookieparser = require('cookie-parser')
+app.use(cookieparser())
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
+    connectionLimit: 3, //this should fix the weird error event bug
     host: 'us-cdbr-east-02.cleardb.com',
     user: 'b0ec116f629fb6',
     password: '1b2f0771f9e2812',
     database: 'heroku_e362e57bba7349a'
-})
+});
 
-connection.connect(function (err) {
-    if (err)
-        return console.error('error ' + err.message)
+connection.on('connection', function(connection) {
     let createVotes = `CREATE TABLE IF NOT EXISTS Votes(SSN INTEGER(255),voterName VARCHAR(255) NOT NULL, candidateName VARCHAR(255) NOT NULL, PRIMARY KEY(SSN))`
     connection.query(createVotes, function (err, results, fields) {
         if (err) {
             console.log(err.message)
         }
     })
-})
-
+});
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
@@ -37,6 +37,12 @@ app.use(express.static("public"));
 // https://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
     response.sendFile(__dirname + "/views/index.html");
+});
+
+app.get("/ballot", (request, response) => {
+    //todo: determine if request contains ssn cookie, only provide webpage if they do
+    console.log(request.headers.cookie)
+    response.sendFile(__dirname + "/views/ballot.html");
 });
 
 // send the default array of dreams to the webpage
@@ -73,7 +79,8 @@ app.post("/voteFcn", bodyParser.json(), (req, res) => {
     /*console.log('SSN = ' + ssn)
     console.log('NAME = ' + name)
     console.log('VOTE = ' + vote)*/
-
+    //Todo: encrypt the ssn
+    res.cookie('ssn', ssn)
     //Quick and dirty way to reset/delete the database on the fly. NOTE: REMOVE BEFORE DEPLOYMENT
     if (vote === 'resetDB') {
         resetDatabase()

@@ -27,9 +27,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="44f09017-54cf-4a63-81e4-f5a087895d71" name="Default Changelist" comment="Added line to reload page upon successful casting of vote to let voter see results">
-      <change afterPath="$PROJECT_DIR$/certificates/generateCerts.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/views/ballot.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/certificates/generateCerts.sh" beforeDir="false" afterPath="$PROJECT_DIR$/certificates/generateCerts.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.js" beforeDir="false" afterPath="$PROJECT_DIR$/server.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,6 +43,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -53,6 +56,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -105,6 +109,8 @@
       <workItem from="1603609682714" duration="129000" />
       <workItem from="1603652357262" duration="7076000" />
       <workItem from="1603724062077" duration="2319000" />
+      <workItem from="1603736098990" duration="648000" />
+      <workItem from="1603764398551" duration="2956000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <created>1603561399922</created>
@@ -209,29 +215,29 @@
       <screen x="0" y="27" width="1680" height="955" />
     </state>
     <state x="623" y="262" width="424" height="491" key="FileChooserDialogImpl/0.27.1680.955@0.27.1680.955" timestamp="1603560167455" />
-    <state width="1657" height="243" key="GridCell.Tab.0.bottom" timestamp="1603731377582">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1721" height="119" key="GridCell.Tab.0.bottom" timestamp="1603766986813">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
     <state width="948" height="2" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1603670741507" />
-    <state width="1721" height="247" key="GridCell.Tab.0.bottom/0.25.1920.1175@0.25.1920.1175" timestamp="1603587974492" />
+    <state width="1721" height="119" key="GridCell.Tab.0.bottom/0.25.1920.1175@0.25.1920.1175" timestamp="1603766986813" />
     <state width="1657" height="243" key="GridCell.Tab.0.bottom/0.27.1680.955@0.27.1680.955" timestamp="1603731377582" />
-    <state width="1657" height="243" key="GridCell.Tab.0.center" timestamp="1603731377581">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1721" height="119" key="GridCell.Tab.0.center" timestamp="1603766986813">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
     <state width="948" height="2" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1603670741507" />
-    <state width="1721" height="247" key="GridCell.Tab.0.center/0.25.1920.1175@0.25.1920.1175" timestamp="1603587974490" />
+    <state width="1721" height="119" key="GridCell.Tab.0.center/0.25.1920.1175@0.25.1920.1175" timestamp="1603766986813" />
     <state width="1657" height="243" key="GridCell.Tab.0.center/0.27.1680.955@0.27.1680.955" timestamp="1603731377581" />
-    <state width="1657" height="243" key="GridCell.Tab.0.left" timestamp="1603731377581">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1721" height="119" key="GridCell.Tab.0.left" timestamp="1603766986810">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
     <state width="948" height="2" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1603670741507" />
-    <state width="1721" height="247" key="GridCell.Tab.0.left/0.25.1920.1175@0.25.1920.1175" timestamp="1603587974489" />
+    <state width="1721" height="119" key="GridCell.Tab.0.left/0.25.1920.1175@0.25.1920.1175" timestamp="1603766986810" />
     <state width="1657" height="243" key="GridCell.Tab.0.left/0.27.1680.955@0.27.1680.955" timestamp="1603731377581" />
-    <state width="1657" height="243" key="GridCell.Tab.0.right" timestamp="1603731377582">
-      <screen x="0" y="27" width="1680" height="955" />
+    <state width="1721" height="119" key="GridCell.Tab.0.right" timestamp="1603766986813">
+      <screen x="0" y="25" width="1920" height="1175" />
     </state>
     <state width="948" height="2" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1603670741507" />
-    <state width="1721" height="247" key="GridCell.Tab.0.right/0.25.1920.1175@0.25.1920.1175" timestamp="1603587974491" />
+    <state width="1721" height="119" key="GridCell.Tab.0.right/0.25.1920.1175@0.25.1920.1175" timestamp="1603766986813" />
     <state width="1657" height="243" key="GridCell.Tab.0.right/0.27.1680.955@0.27.1680.955" timestamp="1603731377582" />
     <state width="1657" height="301" key="GridCell.Tab.1.bottom" timestamp="1603608192925">
       <screen x="0" y="27" width="1680" height="955" />
