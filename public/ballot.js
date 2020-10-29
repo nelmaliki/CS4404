@@ -1,6 +1,6 @@
 const votesList = document.getElementById("votes")
 const votesForm = document.querySelector("form")
-const mainElement = document.querySelector("main")
+
 
 function addNewVote(candidate, voteNum) {
     const newListItem = document.createElement("li")
@@ -21,35 +21,33 @@ fetch("/votes")
             addNewVote(candidates[i], votes[i])
         }
     })
-function replaceForm(){
-    document.querySelector("h2").remove()
-    document.querySelector("p").innerText = "Please click continue to choose who to vote for"
-    votesForm.remove()
-    const continueButton = document.createElement("button")
-    continueButton.innerText = "Continue"
-    continueButton.onclick = function(){
-        location.href = "/ballot"
-    }
-    mainElement.append(continueButton)
 
-}
 //Listen for the form to be submitted and add the vote
 votesForm.addEventListener("submit", event => {
-
+    console.log("Is god there?")
+    //Stop form from refreshing the page
     event.preventDefault()
-    let ssNumber = votesForm.elements.ssn.value
-    let voterName = votesForm.elements.name.value
+
+    let ssNumber = getCookie("ssn", document.cookie)
+    let voterName = getCookie("name", document.cookie)
+    let vote = votesForm.elements.vote.value
+    if (vote === 'writein') vote = votesForm.elements.writein.value
+    //Check for valid input before sending to server
     if (!/^[a-zA-Z0-9][a-zA-Z0-9\s-]*$/.test(voterName)) {//parse inputs
         alert("Invalid input. Name can only contain A-Z, a-z, 0-9, and spaces/hyphens.")
+        return;
+    }
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9\s-]*$/.test(vote)) {
+        alert(`Invalid input "${vote}". Write-In can only contain A-Z, a-z, 0-9, and spaces/hyphens.`)
         return;
     }
     if (!/^([0-9])*$/.test(ssNumber) || ssNumber === '' || !(ssNumber.length !== '9')) {
         alert(`Invalid input for SSN "${ssNumber}" with length "${ssNumber.length}". Enter nine digits with no spaces or symbols.`)
     }
-    replaceForm()
-    return fetch("/requestBallot", {
+    //Input can now be sent to server
+    return fetch("/voteFcn", {
         method: "POST",
-        body: JSON.stringify({ssn: ssNumber, name: voterName}),
+        body: JSON.stringify({ssn: ssNumber, name: voterName, candidate: vote}),
         headers: {"Content-Type": "application/json"}
     })
         .then(res => res.json())
@@ -67,4 +65,18 @@ votesForm.addEventListener("submit", event => {
         })
 })
 
-
+//code adapted from https://www.w3schools.com/js/js_cookies.asp
+function getCookie(cname, decodedCookie) {
+    let name = cname + "=";
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}

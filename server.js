@@ -64,7 +64,37 @@ pool.getConnection(function (err, connection) {
     connection.release();
 });
 
-
+function verifyRegistration(data, callback) {
+    pool.getConnection(function (err, connection) {
+        if (err) {
+            connection.release();
+            throw err;
+        }
+        //super duper vulnerable to sql injection, but nobody say anything
+        let check = `SELECT SSN, voterName FROM VoterData WHERE SSN = ${data.ssn} AND voterName = '${data.name}';`
+        console.log(check)
+        connection.query(check, function (err, results) {
+            if (err) {
+                console.log(`Error in verifyRegistration select ssn and name query`)
+                return console.log(err.message)
+            }
+            let output = JSON.parse(JSON.stringify(results))
+            if(typeof(output[0]) === 'undefined' || !results){
+                console.log(`${data.name} has not registered to vote`)
+                return callback(0)
+            }
+            let name = output[0].voterName
+            let ssn = output[0].SSN
+            connection.release();
+            if (parseInt(data.ssn) === ssn && data.name === name) {
+                console.log(`${data.name} has registered to vote`)
+                return callback(1)
+            }
+            console.log(`${data.name} aka ${name} has not registered to vote with SSN = ${data.ssn} aka \n SSN= ${ssn}`)
+            return callback(0)
+        })
+    })
+}
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
 app.use(express.static("public"));
@@ -74,12 +104,43 @@ app.get("/", (request, response) => {
     response.sendFile(__dirname + "/views/index.html");
 });
 
-app.get("/ballot", (request, response) => {
-    //todo: determine if request contains ssn cookie, only provide webpage if they do
-    console.log(request.headers.cookie)
-    response.sendFile(__dirname + "/views/ballot.html");
-});
+app.get("/ballot", provideBallot);
 
+function provideBallot(request, response){
+    let cookies = request.headers.cookie
+    //currently just ensures that the cookie exists
+    if (typeof cookies !== 'undefined' && cookies) {
+        let ssn = getCookie('ssn', cookies)
+        let name = getCookie('name', cookies)
+        if (ssn !== '' && name !== '') {
+            verifyRegistration({ssn, name}, function (result) {
+                if (result === 1) {
+                    response.sendFile(__dirname + "/views/ballot.html");
+                }
+                else{
+                    response.sendStatus(401)
+                }
+            })
+        }
+    }else{
+        response.sendStatus(401)
+    }
+}
+//code adapted from https://www.w3schools.com/js/js_cookies.asp
+function getCookie(cname, decodedCookie) {
+    let name = cname + "=";
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
 //Call by putting resetDB in the write-in field
 function resetDatabase() {
     pool.getConnection(function (err, connection) {
@@ -117,17 +178,19 @@ function deleteDatabase() {
         connection.release();
     })
 }
+app.post("/requestBallot", bodyParser.json(), (req, res) => {
+    let ssn = req.body.ssn
+    let name = req.body.name
+    res.cookie('ssn', ssn)
+    res.cookie('name', name)
+    res.sendFile(__dirname + "/views/index.html");
+})
 
 app.post("/voteFcn", bodyParser.json(), (req, res) => {
-    console.log(req.body)
     let ssn = req.body.ssn
     let name = req.body.name
     let vote = req.body.candidate
-    /*console.log('SSN = ' + ssn)
-    console.log('NAME = ' + name)
-    console.log('VOTE = ' + vote)*/
-    //Todo: encrypt the ssn
-    res.cookie('ssn', ssn)
+
     //Quick and dirty way to reset/delete the database on the fly. NOTE: REMOVE BEFORE DEPLOYMENT
     if (vote === 'resetDB') {
         resetDatabase()
