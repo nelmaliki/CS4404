@@ -181,9 +181,17 @@ function deleteDatabase() {
 app.post("/requestBallot", bodyParser.json(), (req, res) => {
     let ssn = req.body.ssn
     let name = req.body.name
-    res.cookie('ssn', ssn)
-    res.cookie('name', name)
-    res.sendFile(__dirname + "/views/index.html");
+    verifyRegistration({ssn, name}, function(result) {
+        if (result === 1) {
+            res.cookie('ssn', ssn)
+            res.cookie('name', name)
+            res.sendFile(__dirname + "/views/index.html");
+        }
+        else{
+            //doesn't redirect you if on a browser, but might be useful
+            return res.sendStatus(401)
+        }
+    })
 })
 
 app.post("/voteFcn", bodyParser.json(), (req, res) => {
