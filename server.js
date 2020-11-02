@@ -7,11 +7,18 @@
 const express = require("express")
 const app = express()
 const mysql = require('mysql')
+const forceSSL = require('express-force-ssl')
+const cors = require('cors')
 const bodyParser = require('body-parser')
+app.use(bodyParser.urlencoded({ extended: true }));
 const https = require('https')
+const helmet = require('helmet')
 const fs = require('fs')
 const cookieparser = require('cookie-parser')
+app.use(forceSSL);
 app.use(cookieparser())
+app.use(helmet())
+app.use(cors())
 
 const pool = mysql.createPool({
     connectionLimit: 100, //this should fix the weird error event bug
@@ -22,6 +29,10 @@ const pool = mysql.createPool({
     supportBigNumbers: true
 });
 
+const cookieConfig = {
+    secure: true, //force ssl
+    maxAge: 18000
+}
 
 pool.getConnection(function (err, connection) {
     if (err) {
@@ -183,8 +194,8 @@ app.post("/requestBallot", bodyParser.json(), (req, res) => {
     let name = req.body.name
     verifyRegistration({ssn, name}, function(result) {
         if (result === 1) {
-            res.cookie('ssn', ssn)
-            res.cookie('name', name)
+            res.cookie('ssn', ssn, cookieConfig)
+            res.cookie('name', name, cookieConfig)
             res.sendFile(__dirname + "/views/index.html");
         }
         else{
