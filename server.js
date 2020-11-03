@@ -17,6 +17,7 @@ const fs = require('fs')
 const cookieparser = require('cookie-parser')
 app.use(forceSSL);
 app.use(cookieparser())
+const crypto = require('crypto'), algorithm = 'aes-256-ctr', password = 'jkasdnfgoi';
 app.use(helmet())
 app.use(cors())
 
@@ -75,6 +76,20 @@ pool.getConnection(function (err, connection) {
     connection.release();
 });
 
+//Code adapted from https://lollyrock.com/posts/nodejs-encryption/
+function encrypt(text){
+    let cipher = crypto.createCipher(algorithm, password)
+    let crypted = cipher.update(text, 'utf8', 'hex')
+    crypted += cipher.final('hex')
+    return crypted
+}
+
+function decrypt(text){
+    let decipher = crypto.createDecipher(algorithm, password)
+    let dec = decipher.update(text, 'hex', 'utf8')
+    dec += decipher.final('utf8')
+    return dec
+}
 function verifyRegistration(data, callback) {
     pool.getConnection(function (err, connection) {
         if (err) {
@@ -83,7 +98,6 @@ function verifyRegistration(data, callback) {
         }
         //super duper vulnerable to sql injection, but nobody say anything
         let check = `SELECT SSN, voterName FROM VoterData WHERE SSN = ${data.ssn} AND voterName = '${data.name}';`
-        console.log(check)
         connection.query(check, function (err, results) {
             if (err) {
                 console.log(`Error in verifyRegistration select ssn and name query`)
@@ -129,10 +143,12 @@ function provideBallot(request, response){
                     response.sendFile(__dirname + "/views/ballot.html");
                 }
                 else{
-                    response.sendStatus(401)
+                    response.clearCookie("ssn")
+                    response.clearCookie("name")
+                    return response.sendStatus(401)
                 }
             })
-        }
+        }else response.sendStatus(401)
     }else{
         response.sendStatus(401)
     }
@@ -140,17 +156,22 @@ function provideBallot(request, response){
 //code adapted from https://www.w3schools.com/js/js_cookies.asp
 function getCookie(cname, decodedCookie) {
     let name = cname + "=";
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
+    if (typeof decodedCookie !== 'undefined' && decodedCookie) {
+        let ca = decodedCookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                let output = c.substring(name.length, c.length)
+                return decrypt(output);
+            }
         }
-        if (c.indexOf(name) === 0) {
-            return c.substring(name.length, c.length);
-        }
+    }else{
+        return "";
     }
-    return "";
+
 }
 //Call by putting resetDB in the write-in field
 function resetDatabase() {
@@ -194,8 +215,8 @@ app.post("/requestBallot", bodyParser.json(), (req, res) => {
     let name = req.body.name
     verifyRegistration({ssn, name}, function(result) {
         if (result === 1) {
-            res.cookie('ssn', ssn, cookieConfig)
-            res.cookie('name', name, cookieConfig)
+            res.cookie('ssn', encrypt(ssn), cookieConfig)
+            res.cookie('name', encrypt(name), cookieConfig)
             res.sendFile(__dirname + "/views/index.html");
         }
         else{
@@ -206,8 +227,9 @@ app.post("/requestBallot", bodyParser.json(), (req, res) => {
 })
 
 app.post("/voteFcn", bodyParser.json(), (req, res) => {
-    let ssn = req.body.ssn
-    let name = req.body.name
+    let cookies = req.headers.cookie
+    let ssn = getCookie('ssn', cookies)
+    let name = getCookie('name', cookies)
     let vote = req.body.candidate
 
     //Quick and dirty way to reset/delete the database on the fly. NOTE: REMOVE BEFORE DEPLOYMENT

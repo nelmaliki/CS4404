@@ -24,7 +24,7 @@ fetch("/votes")
 
 //Listen for the form to be submitted and add the vote
 votesForm.addEventListener("submit", event => {
-    console.log("Is god there?")
+
     //Stop form from refreshing the page
     event.preventDefault()
 
@@ -32,18 +32,12 @@ votesForm.addEventListener("submit", event => {
     let voterName = getCookie("name", document.cookie)
     let vote = votesForm.elements.vote.value
     if (vote === 'writein') vote = votesForm.elements.writein.value
-    //Check for valid input before sending to server
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9\s-]*$/.test(voterName)) {//parse inputs
-        alert("Invalid input. Name can only contain A-Z, a-z, 0-9, and spaces/hyphens.")
-        return;
-    }
+
     if (!/^[a-zA-Z0-9][a-zA-Z0-9\s-]*$/.test(vote)) {
         alert(`Invalid input "${vote}". Write-In can only contain A-Z, a-z, 0-9, and spaces/hyphens.`)
         return;
     }
-    if (!/^([0-9])*$/.test(ssNumber) || ssNumber === '' || !(ssNumber.length !== '9')) {
-        alert(`Invalid input for SSN "${ssNumber}" with length "${ssNumber.length}". Enter nine digits with no spaces or symbols.`)
-    }
+
     //Input can now be sent to server
     return fetch("/voteFcn", {
         method: "POST",

@@ -1,0 +1,120 @@
+Index: server.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>'use strict' //Prevents use of undeclared variables\n// server.js\n// where your node app starts\n\n// we've started you off with Express (https://expressjs.com/)\n// but feel free to use whatever libraries or frameworks you'd like through `package.json`.\nconst express = require(\"express\")\nconst app = express()\nconst mysql = require('mysql')\nconst bodyParser = require('body-parser')\nconst https = require('https')\nconst fs = require('fs')\nconst cookieparser = require('cookie-parser')\napp.use(cookieparser())\n\nconst connection = mysql.createPool({\n    connectionLimit: 3, //this should fix the weird error event bug\n    host: 'us-cdbr-east-02.cleardb.com',\n    user: 'b0ec116f629fb6',\n    password: '1b2f0771f9e2812',\n    database: 'heroku_e362e57bba7349a'\n});\n\nconnection.on('connection', function(connection) {\n    let createVotes = `CREATE TABLE IF NOT EXISTS Votes(SSN INTEGER(255),voterName VARCHAR(255) NOT NULL, candidateName VARCHAR(255) NOT NULL, PRIMARY KEY(SSN))`\n    connection.query(createVotes, function (err, results, fields) {\n        if (err) {\n            console.log(err.message)\n        }\n    })\n});\n\n// make all the files in 'public' available\n// https://expressjs.com/en/starter/static-files.html\napp.use(express.static(\"public\"));\n\n// https://expressjs.com/en/starter/basic-routing.html\napp.get(\"/\", (request, response) => {\n    response.sendFile(__dirname + \"/views/index.html\");\n});\n\napp.get(\"/ballot\", (request, response) => {\n    //todo: determine if request contains ssn cookie, only provide webpage if they do\n    console.log(request.headers.cookie)\n    response.sendFile(__dirname + \"/views/ballot.html\");\n});\n\n// send the default array of dreams to the webpage\n/*app.get(\"/dreams\", (request, response) => {\n    // express helps us take JS objects and send them as JSON\n    response.json(dreams);\n});*/\n\n//Call by putting resetDB in the write-in field\nfunction resetDatabase() {\n    let deleteRecords = `DELETE FROM Votes;`\n    connection.query(deleteRecords, function (err, results, fields) {\n        if (err) {\n            return console.log(err.message)\n        }\n    })\n}\n\n//Call by putting deleteDB in the write-in field\nfunction deleteDatabase() {\n    let deleteDB = `DROP TABLE Votes`\n    connection.query(deleteDB, function (err, results, fields) {\n        if (err) {\n            return console.log(err.message)\n        }\n    })\n}\n\napp.post(\"/voteFcn\", bodyParser.json(), (req, res) => {\n    console.log(req.body)\n    let ssn = req.body.ssn\n    let name = req.body.name\n    let vote = req.body.candidate\n    /*console.log('SSN = ' + ssn)\n    console.log('NAME = ' + name)\n    console.log('VOTE = ' + vote)*/\n    //Todo: encrypt the ssn\n    res.cookie('ssn', ssn)\n    //Quick and dirty way to reset/delete the database on the fly. NOTE: REMOVE BEFORE DEPLOYMENT\n    if (vote === 'resetDB') {\n        resetDatabase()\n        res.json({res: false, message: `Reset database.`})\n        return console.log(`Reset database!`)\n    }\n    if (vote === 'deleteDB') {\n        deleteDatabase()\n        res.json({res: false, message: `Deleted database, please restart the server.`})\n        return console.log('Deleted database, please restart server.')\n    }\n    let value = 0\n    addToDatabase({ssn,name,vote},function(result) {\n        value = result\n        console.log(`VALUE = ${value}`)\n        if (value) {\n            console.log(\"addToDatabase returned true.\")\n\n            res.json({res: true, message: `${name}, your vote for ${vote} has been recorded.`})\n        } else {\n            console.log(\"addToDatabase returned false.\")\n            res.json({res: false, message: `${name}, you have already voted.`})\n        }\n    })\n});\n\nfunction addToDatabase(data, callback) {\n    let sql = `INSERT INTO Votes VALUES (${data.ssn}, '${data.name}','${data.vote}')`;\n    connection.query(sql, function (err, results, fields) {\n        if (err) {\n            console.log(err.message)\n            return callback(0)\n\n        }\n        console.log(\"1 record inserted.\")\n        return callback(1)\n    })\n}\n\n\n\napp.get('/votes', (req, res) => {\n    let candidates = []\n    let votes = []\n    let sql = `SELECT candidateName, COUNT(*) AS numVotes FROM VOTES GROUP BY candidateName`\n    connection.query(sql, function (err, results) {\n        if (err) {\n            console.log(`Error in app.get query`)\n            return console.log(err.message)\n        }\n        Object.keys(results).forEach(function (key) {\n            var row = results[key]\n            candidates.push(row.candidateName)\n            votes.push(row.numVotes)\n        })\n        res.json({nameCandidate: candidates, numVotes: votes})\n    })\n})\n\n// listen for requests :)\n/*const listener = app.listen(process.env.PORT, () => {\n    console.log(\"Your app is listening on port \" + listener.address().port);\n});*/\n\nconst options = {\n    key: fs.readFileSync(\"./certificates/key.pem\"),\n    cert: fs.readFileSync(\"./certificates/cert.pem\")\n}\n\n//Listen on http\napp.listen(8000)\n//Listen on https. The domain is https://localhost:8080\nhttps.createServer(options,app).listen(8080)\nconsole.log(\"Your app is listening on port 8000 for HTTP connections. http://localhost:8000\")\nconsole.log(\"Your app is listening on port 8080 for HTTPS connections. https://localhost:8080\")
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- server.js	(revision 0305908ef15ee2629621ced9827eb303ba71f7d9)
++++ server.js	(date 1603834543765)
+@@ -41,8 +41,16 @@
+ 
+ app.get("/ballot", (request, response) => {
+     //todo: determine if request contains ssn cookie, only provide webpage if they do
+-    console.log(request.headers.cookie)
+-    response.sendFile(__dirname + "/views/ballot.html");
++    let cookies = request.headers.cookie
++    //currently just ensures that the cookie exists
++    if (typeof cookies !== 'undefined' && cookies){
++        cookieparser.JSONCookies(cookies)
++        console.log(cookies['ssn'])
++        response.sendFile(__dirname + "/views/ballot.html");
++    }
++    else{
++        response.sendStatus(401)
++    }
+ });
+ 
+ // send the default array of dreams to the webpage
+@@ -70,6 +78,11 @@
+         }
+     })
+ }
++app.post("/requestBallot", bodyParser.json(), (req, res) => {
++    let ssn = req.body.ssn
++    res.cookie('ssn', ssn)
++    res.json({res: true, message: `${name}, Please vote for your candidate now`})
++})
+ 
+ app.post("/voteFcn", bodyParser.json(), (req, res) => {
+     console.log(req.body)
+Index: views/ballot.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!-- This is a static file -->\n<!-- served from your routes in server.js -->\n<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <link id=\"favicon\" href=\"data:image/x-icon;base64,AAABAAEAEBAAAAEACABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAEhISACslsQAcFqYAJx6dAGlqagDe6uwAFBQUANzn6wDk8PQAMTIwANfj5QDf7O4AHBocAJeXlwDc6e0A////ABYWFgDw9/oAGR0cACgesADi7vAADw8PACojswAGCwkAGBgYAOj0+ADm8vUAPTixACMbrgAlHaoAEQ5bAOLt8QD8//0A3+vuAGtm4wBrbGoA/v/9AEBBPwAeFawAWVlZAC4uLgAAAQAA/v7+ANHS8AAxMzEA5vH1AAsNFwC4xMcA2OTmADIougDS4eQA2OPnAERERABGREQAsL7EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQJSUrJSElECEQEBAQEBArLiAGIhU3Gw8zMBocEBAQEBQdAgggEiYkIwU2GRAQEBAyHhMHKQYMKiwQEBAQEBAQGDE0CQstNRAQEBAQEBAQECcvHwERDhAQEBAQEBAQEBAKBAMXFhAQEBAQEBAQEBAQEBAoDSsQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAP//AAA=\" rel=\"icon\" type=\"image/x-icon\" />\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <meta name=\"description\" content=\"Voting system for Shueworld\">\n\n    <title>Voting System</title>\n\n    <!-- import the webpage's client-side javascript file -->\n    <script src=\"script.js\" defer></script>\n</head>\n\n<body>\n<header>\n    <h1>Cast your vote</h1>\n</header>\n\n<main>\n    <h2>Please select your candidate, then press submit</h2>\n\n\n    <form>\n        <div><label> Your Name: <input type=\"text\" maxlength=\"50\" name=\"name\" required placeholder=\"First and last separated by space\"></label></div>\n        <div><label> Your SNN: <input type=\"text\" maxlength=\"50\" name=\"ssn\" required placeholder=\"SSN, no dashes or spaces\"></label></div>\n        <div><label> <input type=\"radio\" name=\"vote\" value=\"Nike\"> Nike </label></div>\n        <div><label> <input type=\"radio\" name=\"vote\" value=\"Skechers\"> Skechers </label></div>\n        <div>\n            <label> <input type=\"radio\" name=\"vote\" value=\"writein\"> Write-In </label>\n            <input type=\"text\" maxlength=\"50\" name=\"writein\" placeholder=\"Write-In Space\">\n        </div>\n        <button type=\"submit\" id=\"submit-vote\"> Cast Vote </button>\n    </form>\n    <h3>Vote Data</h3>\n    <section class=\"votes\">\n        <ul id=\"votes\">\n            <em>loading votes&hellip;</em>\n        </ul>\n    </section>\n</main>\n</body>\n</html>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- views/ballot.html	(revision 0305908ef15ee2629621ced9827eb303ba71f7d9)
++++ views/ballot.html	(date 1603830473056)
+@@ -34,7 +34,7 @@
+             <label> <input type="radio" name="vote" value="writein"> Write-In </label>
+             <input type="text" maxlength="50" name="writein" placeholder="Write-In Space">
+         </div>
+-        <button type="submit" id="submit-vote"> Cast Vote </button>
++        <button type="submit" id="submit-vote" > Cast Vote </button>
+     </form>
+     <h3>Vote Data</h3>
+     <section class="votes">
+Index: views/index.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!-- This is a static file -->\n<!-- served from your routes in server.js -->\n<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <link id=\"favicon\" href=\"data:image/x-icon;base64,AAABAAEAEBAAAAEACABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAEhISACslsQAcFqYAJx6dAGlqagDe6uwAFBQUANzn6wDk8PQAMTIwANfj5QDf7O4AHBocAJeXlwDc6e0A////ABYWFgDw9/oAGR0cACgesADi7vAADw8PACojswAGCwkAGBgYAOj0+ADm8vUAPTixACMbrgAlHaoAEQ5bAOLt8QD8//0A3+vuAGtm4wBrbGoA/v/9AEBBPwAeFawAWVlZAC4uLgAAAQAA/v7+ANHS8AAxMzEA5vH1AAsNFwC4xMcA2OTmADIougDS4eQA2OPnAERERABGREQAsL7EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQJSUrJSElECEQEBAQEBArLiAGIhU3Gw8zMBocEBAQEBQdAgggEiYkIwU2GRAQEBAyHhMHKQYMKiwQEBAQEBAQGDE0CQstNRAQEBAQEBAQECcvHwERDhAQEBAQEBAQEBAKBAMXFhAQEBAQEBAQEBAQEBAoDSsQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AAD//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAP//AAA=\" rel=\"icon\" type=\"image/x-icon\" />\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <meta name=\"description\" content=\"Voting system for Shueworld\">\n\n    <title>Voting System</title>\n\n    <!-- import the webpage's client-side javascript file -->\n    <script src=\"script.js\" defer></script>\n</head>\n<body>\n<header>\n    <h1>Cast your vote</h1>\n</header>\n\n<main>\n    <h2>Enter your name and candidate selection, then press submit</h2>\n\n    <p>Enter name (first and last with a space in between):</p>\n\n    <form>\n        <div><label> Your Name: <input type=\"text\" maxlength=\"50\" name=\"name\" required placeholder=\"First and last separated by space\"></label></div>\n        <div><label> Your SNN: <input type=\"text\" maxlength=\"50\" name=\"ssn\" required placeholder=\"SSN, no dashes or spaces\"></label></div>\n        <div><label> <input type=\"radio\" name=\"vote\" value=\"Nike\"> Nike </label></div>\n        <div><label> <input type=\"radio\" name=\"vote\" value=\"Skechers\"> Skechers </label></div>\n        <div>\n            <label> <input type=\"radio\" name=\"vote\" value=\"writein\"> Write-In </label>\n            <input type=\"text\" maxlength=\"50\" name=\"writein\" placeholder=\"Write-In Space\">\n        </div>\n        <button type=\"submit\" id=\"submit-vote\"> Cast Vote </button>\n    </form>\n    <h3>Vote Data</h3>\n    <section class=\"votes\">\n        <ul id=\"votes\">\n            <em>loading votes&hellip;</em>\n        </ul>\n    </section>\n</main>\n</body>\n</html>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- views/index.html	(revision 0305908ef15ee2629621ced9827eb303ba71f7d9)
++++ views/index.html	(date 1603834728900)
+@@ -28,13 +28,7 @@
+     <form>
+         <div><label> Your Name: <input type="text" maxlength="50" name="name" required placeholder="First and last separated by space"></label></div>
+         <div><label> Your SNN: <input type="text" maxlength="50" name="ssn" required placeholder="SSN, no dashes or spaces"></label></div>
+-        <div><label> <input type="radio" name="vote" value="Nike"> Nike </label></div>
+-        <div><label> <input type="radio" name="vote" value="Skechers"> Skechers </label></div>
+-        <div>
+-            <label> <input type="radio" name="vote" value="writein"> Write-In </label>
+-            <input type="text" maxlength="50" name="writein" placeholder="Write-In Space">
+-        </div>
+-        <button type="submit" id="submit-vote"> Cast Vote </button>
++        <button type="request-ballot" id="request-ballot" onclick="window.location.href = 'ballot'"> Cast Vote </button>
+     </form>
+     <h3>Vote Data</h3>
+     <section class="votes">
+Index: public/script.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>const votesList = document.getElementById(\"votes\")\nconst votesForm = document.querySelector(\"form\")\n\nfunction addNewVote(candidate, voteNum) {\n    const newListItem = document.createElement(\"li\")\n    newListItem.innerText = candidate + '\\t' + voteNum\n    votesList.appendChild(newListItem)\n}\n\nfetch(\"/votes\")\n    .then(res => res.json())\n    .then(vvvvvvv => {\n        let candidates = vvvvvvv.nameCandidate\n        let votes = vvvvvvv.numVotes\n        //remove loading message\n        //votesList.firstElementChild.remove()\n        votesList.innerHTML=''\n        //iterate through every new vote and add it to the page\n        for (let i = 0; i < candidates.length; i++) {\n            addNewVote(candidates[i], votes[i])\n        }\n    })\n//Listen for the form to be submitted and add the vote\nvotesForm.addEventListener(\"submit\", event => {\n    //Stop form from refreshing the page\n    event.preventDefault()\n\n    //get new values\n\n    let ssNumber = votesForm.elements.ssn.value\n    console.log(ssNumber)\n    let voterName = votesForm.elements.name.value\n    let vote = votesForm.elements.vote.value\n    if (vote === 'writein') vote = votesForm.elements.writein.value\n    //Check for valid input before sending to server\n    if (!/^[a-zA-Z0-9][a-zA-Z0-9\\s-]*$/.test(voterName)) {//parse inputs\n        alert(\"Invalid input. Name can only contain A-Z, a-z, 0-9, and spaces/hyphens.\")\n        return;\n    }\n    if (!/^[a-zA-Z0-9][a-zA-Z0-9\\s-]*$/.test(vote)) {\n        alert(`Invalid input \"${vote}\". Write-In can only contain A-Z, a-z, 0-9, and spaces/hyphens.`)\n        return;\n    }\n    if (!/^([0-9])*$/.test(ssNumber) || ssNumber === '' || !(ssNumber.length !== '9')) {\n        alert(`Invalid input for SSN \"${ssNumber}\" with length \"${ssNumber.length}\". Enter nine digits with no spaces or symbols.`)\n    }\n    //Input can now be sent to server\n    return fetch(\"/voteFcn\", {\n        method: \"POST\",\n        body: JSON.stringify({ssn: ssNumber, name: voterName, candidate: vote}),\n        headers: {\"Content-Type\": \"application/json\"}\n    })\n        .then(res => res.json())\n        .then(json => {\n            if(json.res ===true) {\n                alert(json.message)\n                location.reload()\n            }\n            else if(json.res===false){\n                alert(json.message)\n                location.reload()\n            }\n            //reset form\n            votesForm.reset()\n        })\n})\n\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- public/script.js	(revision 0305908ef15ee2629621ced9827eb303ba71f7d9)
++++ public/script.js	(date 1603832890616)
+@@ -20,6 +20,28 @@
+             addNewVote(candidates[i], votes[i])
+         }
+     })
++
++votesForm.addEventListener("request-ballot", event => {
++    //todo: add conditional check for if they should get a ballot or not
++    return fetch("/requestBallot", {
++        method: "POST",
++        body: JSON.stringify({ssn: ssNumber, name: voterName, candidate: vote}),
++        headers: {"Content-Type": "application/json"}
++    })
++        .then(res => res.json())
++        .then(json => {
++            if(json.res ===true) {
++                alert(json.message)
++                location.reload()
++            }
++            else if(json.res===false){
++                alert(json.message)
++                location.reload()
++            }
++            //reset form
++            votesForm.reset()
++        })
++})
+ //Listen for the form to be submitted and add the vote
+ votesForm.addEventListener("submit", event => {
+     //Stop form from refreshing the page
