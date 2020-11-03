@@ -26,11 +26,8 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44f09017-54cf-4a63-81e4-f5a087895d71" name="Default Changelist" comment="Adjusted server to force https only and added cookie fields to set an expiration time and force them to use ssl.">
-      <change afterPath="$PROJECT_DIR$/README.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/certificates/cert.pem" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/certificates/key.pem" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="44f09017-54cf-4a63-81e4-f5a087895d71" name="Default Changelist" comment="Added README.txt">
+      <change beforePath="$PROJECT_DIR$/README.txt" beforeDir="false" afterPath="$PROJECT_DIR$/README.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -131,7 +128,7 @@
       <workItem from="1603994382431" duration="600000" />
       <workItem from="1603995062948" duration="5416000" />
       <workItem from="1604351205559" duration="3885000" />
-      <workItem from="1604433502908" duration="402000" />
+      <workItem from="1604433502908" duration="523000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit">
       <created>1603561399922</created>
@@ -189,7 +186,14 @@
       <option name="project" value="LOCAL" />
       <updated>1604354944429</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Added README.txt">
+      <created>1604433919548</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1604433919548</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -233,7 +237,8 @@
     <MESSAGE value="Added line to reload page upon successful casting of vote to let voter see results" />
     <MESSAGE value="Added session management and cookies" />
     <MESSAGE value="Adjusted server to force https only and added cookie fields to set an expiration time and force them to use ssl." />
-    <option name="LAST_COMMIT_MESSAGE" value="Adjusted server to force https only and added cookie fields to set an expiration time and force them to use ssl." />
+    <MESSAGE value="Added README.txt" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added README.txt" />
   </component>
   <component name="WindowStateProjectService">
     <state x="601" y="288" width="467" height="453" key="#Web_Browsers" timestamp="1603828145592">
@@ -347,10 +352,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="164" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1603995069922" />
-    <state x="497" y="217" width="802" height="523" key="Vcs.Push.Dialog.v2" timestamp="1604355051638">
+    <state x="497" y="217" width="802" height="523" key="Vcs.Push.Dialog.v2" timestamp="1604433922891">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="497" y="217" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1604355051638" />
+    <state x="497" y="217" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1604433922891" />
     <state x="497" y="270" width="802" height="523" key="Vcs.Push.Dialog.v2/0.25.1920.1175@0.25.1920.1175" timestamp="1603936770482" />
     <state x="435" y="226" width="800" height="563" key="Vcs.Push.Dialog.v2/0.27.1680.955@0.27.1680.955" timestamp="1603692123024" />
     <state x="710" y="427" width="365" height="171" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1604351238690">
