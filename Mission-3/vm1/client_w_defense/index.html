@@ -1,0 +1,43 @@
+<!DOCTYPYE html>
+<html>
+	<body>
+		<h1> CAN YOU SEE ME?? </h1>
+		<button id=butt onclick="redirect()"> hi</button>
+	</body>
+	<script>
+		var url = "http://" //initialized in redirect function
+		var xhr = new XMLHttpRequest();
+		function redirect() {
+			document.getElementById("butt").innerHTML="click"
+			var source = "10.21.8.1:8180";
+			var realm = "/auth/realms/myrealm";
+			var protocol = "/protocol/openid-connect";
+			var response = "/auth?response_type=id_token%20token";
+			var client_id = "&client_id=nour";
+			var redirect = "&redirect_uri=http%3A%2F%2F10.21.8.1%3A8001/index2.html";
+			xhr.open("POST","10.21.8.1:8001/updateNonce",true);
+			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			//also use nonce as as RP session ID
+			var sessionKey = Math.floor(Math.random()*999999);
+			var nonce = "&nonce=some-nonce-" 
+			nonce += sessionKey.toString();
+			var login = "&login=true";
+			var scope = "&scope=openid";
+			url += source + realm + protocol + response + client_id + redirect + nonce + login + scope;
+			//register nonce with sever
+			xhr.onreadystatechange = function(){
+				console.log("Post Request returned!")
+				if(this.readyState == 4 && this.status==200){
+					window.location.replace( url);
+				}
+				else{
+					document.getElementById("butt").innerHTML="refresh page"
+				}
+			}	
+
+			xhr.send(nonce)
+		}
+
+	</script>
+</html>
+

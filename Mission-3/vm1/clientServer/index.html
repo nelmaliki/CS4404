@@ -1,0 +1,29 @@
+<!DOCTYPYE html>
+<html>
+	<body>
+		<h1> CAN YOU SEE ME?? </h1>
+		<button id=butt onclick="redirect()"> hi</button>
+	</body>
+	<script>
+		function redirect() {
+			document.getElementById("butt").innerHTML="click"
+			var source = "10.21.8.1:8180";
+			var realm = "/auth/realms/myrealm";
+			var protocol = "/protocol/openid-connect";
+			var response = "/auth?response_type=id_token%20token";
+			var client_id = "&client_id=nour";
+			var redirect = "&redirect_uri=http%3A%2F%2F10.21.8.1%3A8001/index2.html";
+			//Todo: Generate a new nonce every time
+			//also use nonce as as RP session ID
+			var sessionKey = Math.floor(Math.random()*999999);
+			var nonce = "&nonce=some-nonce-" 
+			nonce += sessionKey.toString();
+			var login = "&login=true";
+			var scope = "&scope=openid";
+			var url = "http://";
+			url += source += realm += protocol += response += client_id += redirect += nonce += login += scope;
+			window.location.replace( url);
+		}
+	</script>
+</html>
+

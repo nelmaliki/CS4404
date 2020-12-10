@@ -1,0 +1,16 @@
+<!DOCTYPYE html>
+<html>
+	<body onload="redirect()">
+		<h1 id=head> One sec, logging you in with the client server! </h1>
+	</body>
+	<script> //shamelessly borrowed from stack overflow
+		function redirect(){
+
+			var url = window.location.hash;
+			var urlParams = new URLSearchParams(url);
+			var redirect = "http://10.21.8.1:8001/profile.html?" + urlParams; 
+			window.location.replace(redirect);
+		}
+	</script>
+</html>
+
